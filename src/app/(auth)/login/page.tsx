@@ -45,16 +45,11 @@ export default function LoginPage() {
         <div className="relative z-10 flex flex-col justify-between p-12 text-white w-full">
           {/* Top: Logo */}
           <Link href="/" className="inline-flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-lg border border-white/20 flex items-center justify-center group-hover:scale-105 transition-transform">
-              <svg viewBox="0 0 24 24" className="w-5 h-5 text-white" fill="none">
-                <path
-                  d="M16 6H10C8.34315 6 7 7.34315 7 9C7 10.6569 8.34315 12 10 12H14C15.6569 12 17 13.3431 17 15C17 16.6569 15.6569 18 14 18H8"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </div>
+            <img
+              src="/logo.jpeg"
+              alt="Synergific Software"
+              className="h-12 w-auto rounded-lg bg-white/15 backdrop-blur-lg border border-white/20 p-1 group-hover:scale-105 transition-transform"
+            />
             <div>
               <p className="text-[16px] font-bold tracking-tight">Synergific</p>
               <p className="text-[10px] text-white/70 tracking-wider uppercase font-semibold">AI Business Suite</p>
