@@ -97,7 +97,8 @@ export default function ContactDetailPage() {
     }
   }
 
-  async function handleReassign(newOwnerId: string) {
+  async function handleReassign(newOwnerId: string | null) {
+    if (!newOwnerId) return;
     setReassigning(true);
     const ownerId = newOwnerId === "__unassign__" ? null : newOwnerId;
     const res = await fetch(`/api/contacts/${params.id}`, {
@@ -230,7 +231,7 @@ export default function ContactDetailPage() {
                   </p>
                   {isAdminUser ? (
                     <Select
-                      value={contact.ownerId || "__unassign__"}
+                      value={contact.ownerId ?? "__unassign__"}
                       onValueChange={handleReassign}
                       disabled={reassigning}
                     >
@@ -342,7 +343,7 @@ export default function ContactDetailPage() {
             </p>
             <div className="space-y-1.5">
               <Label className="text-[11px]">Hand off to (optional)</Label>
-              <Select value={handoffToUserId} onValueChange={setHandoffToUserId}>
+              <Select value={handoffToUserId} onValueChange={(v) => setHandoffToUserId(v || "__any__")}>
                 <SelectTrigger className="h-9 text-[12px]">
                   <SelectValue />
                 </SelectTrigger>
