@@ -568,9 +568,9 @@ export default function ContactsPage() {
             </button>
             {isAdminUser && team.length > 0 && (
               <Select
-                onValueChange={(value) => {
+                onValueChange={(value: string | null) => {
                   if (value === "__unassign__") bulkAction("assign", undefined, null);
-                  else bulkAction("assign", undefined, value);
+                  else if (value) bulkAction("assign", undefined, value);
                 }}
               >
                 <SelectTrigger className="h-7 w-[150px] text-[11px] bg-card border-border">
