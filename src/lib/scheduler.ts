@@ -21,6 +21,86 @@ declare global {
 }
 
 /**
+ * Process scheduled emails whose scheduledAt time has passed.
+ */
+async function processScheduledEmails() {
+  const due = await prisma.scheduledEmail.findMany({
+    where: {
+      status: "scheduled",
+      scheduledAt: { lte: new Date() },
+    },
+  });
+
+  for (const scheduled of due) {
+    let contactIds: string[] = [];
+    try {
+      contactIds = JSON.parse(scheduled.contactIds);
+    } catch {
+      await prisma.scheduledEmail.update({
+        where: { id: scheduled.id },
+        data: { status: "failed" },
+      });
+      continue;
+    }
+
+    if (contactIds.length === 0) {
+      await prisma.scheduledEmail.update({
+        where: { id: scheduled.id },
+        data: { status: "failed" },
+      });
+      continue;
+    }
+
+    const contacts = await prisma.contact.findMany({
+      where: { id: { in: contactIds } },
+    });
+
+    let sentCount = 0;
+    let failedCount = 0;
+
+    for (const contact of contacts) {
+      const variables = {
+        name: contact.name,
+        email: contact.email,
+        company: contact.company || "your business",
+      };
+      const subject = parseTemplate(scheduled.subject, variables);
+      const body = parseTemplate(scheduled.body, variables);
+
+      const result = await sendEmail({
+        to: contact.email,
+        subject,
+        body,
+        contactId: contact.id,
+        templateId: scheduled.templateId || undefined,
+        autoFollowUp: scheduled.autoFollowUp,
+        senderUserId: scheduled.userId,
+      });
+
+      if (result.success) {
+        sentCount++;
+      } else {
+        failedCount++;
+      }
+    }
+
+    await prisma.scheduledEmail.update({
+      where: { id: scheduled.id },
+      data: {
+        status: failedCount === contacts.length ? "failed" : "sent",
+        sentAt: new Date(),
+        sentCount,
+        failedCount,
+      },
+    });
+
+    console.log(
+      `[scheduler] Scheduled email "${scheduled.name}" — ${sentCount} sent, ${failedCount} failed`
+    );
+  }
+}
+
+/**
  * Process scheduled campaigns whose scheduledFor time has passed.
  */
 async function processScheduledCampaigns() {
@@ -125,6 +205,13 @@ export function startFollowUpScheduler() {
         console.log(`[scheduler] Processed ${followUpResults.length} follow-ups`);
       }
       await processScheduledCampaigns();
+
+      // Process scheduled emails
+      try {
+        await processScheduledEmails();
+      } catch (e) {
+        console.error("[scheduler] Scheduled emails processing failed:", e);
+      }
 
       // Weekly digests — invoke at most once per hour, the digest fn handles per-user 7-day dedup
       const lastDigest = globalThis.__lastDigestRunAt || 0;

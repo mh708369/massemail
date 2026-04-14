@@ -36,6 +36,7 @@ import {
   Filter,
   Globe,
   MailCheck,
+  Calendar,
 } from "lucide-react";
 
 type CountKey = "leads" | "inbox" | "tasks" | "tickets" | "deals" | "handoffs";
@@ -75,6 +76,7 @@ const navSections: NavSection[] = [
     items: [
       { title: "Inbox", href: "/communications", icon: Inbox, countKey: "inbox" },
       { title: "Mass Email", href: "/mass-email", icon: Send },
+      { title: "Scheduled", href: "/scheduled-emails", icon: Calendar },
       { title: "Templates", href: "/templates", icon: FileText },
     ],
   },

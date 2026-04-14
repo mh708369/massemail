@@ -40,6 +40,7 @@ model User {
   apiKeys         ApiKey[]
   handoffRequests       LeadHandoffRequest[] @relation("HandoffRequester")
   handoffReviews        LeadHandoffRequest[] @relation("HandoffReviewer")
+  scheduledEmails       ScheduledEmail[]
 }
 
 // ─── EMAIL ACCOUNTS (per-user mailbox connections) ───────
@@ -491,6 +492,28 @@ model SystemSetting {
   key       String   @id
   value     String   // JSON string for complex values, plain string for simple ones
   updatedAt DateTime @updatedAt
+}
+
+// ─── SCHEDULED EMAILS ────────────────────────────────────
+
+model ScheduledEmail {
+  id          String   @id @default(uuid())
+  name        String                           // user-friendly label
+  subject     String
+  body        String
+  templateId  String?                          // optional template reference
+  contactIds  String                           // JSON array of contact IDs
+  status      String   @default("scheduled")   // scheduled | sent | cancelled | failed
+  scheduledAt DateTime                         // when to send
+  sentAt      DateTime?
+  sentCount   Int      @default(0)
+  failedCount Int      @default(0)
+  autoFollowUp Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 // ─── SAVED VIEWS ─────────────────────────────────────────
