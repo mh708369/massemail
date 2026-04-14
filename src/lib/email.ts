@@ -335,7 +335,7 @@ export async function replyToEmail({
     };
 
     const res = await fetch(
-      `${GRAPH_URL}${ctx.graphUserPath}/messages/${graphMessageId}/reply`,
+      `${GRAPH_URL}${ctx.graphUserPath}/messages/${graphMessageId}/replyAll`,
       {
         method: "POST",
         headers: {
