@@ -38,6 +38,9 @@ export async function POST(req: Request) {
 
   if (action === "delete") {
     const result = await prisma.contact.deleteMany({ where: { id: { in: allowedIds } } });
+    if (user) {
+      logAction({ userId: user.id, action: "contact.bulk_delete", entity: "contact", details: { count: result.count, ids: allowedIds } }).catch(() => {});
+    }
     return NextResponse.json({ success: true, count: result.count });
   }
 
@@ -46,6 +49,9 @@ export async function POST(req: Request) {
       where: { id: { in: allowedIds } },
       data: { status },
     });
+    if (user) {
+      logAction({ userId: user.id, action: "contact.bulk_status", entity: "contact", details: { count: result.count, status, ids: allowedIds } }).catch(() => {});
+    }
     return NextResponse.json({ success: true, count: result.count });
   }
 
@@ -84,6 +90,9 @@ export async function POST(req: Request) {
         });
         updated++;
       }
+    }
+    if (user) {
+      logAction({ userId: user.id, action: "contact.bulk_tag", entity: "contact", details: { count: updated, tag, ids: allowedIds } }).catch(() => {});
     }
     return NextResponse.json({ success: true, count: updated });
   }

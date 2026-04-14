@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser, isAdmin } from "@/lib/rbac";
+import { logAction } from "@/lib/audit";
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -25,5 +26,8 @@ export async function POST(req: Request) {
       isActive: data.isActive ?? true,
     },
   });
+
+  logAction({ userId: user!.id, action: "workflow.create", entity: "workflow", entityId: workflow.id, details: { name: data.name, trigger: data.trigger } }).catch(() => {});
+
   return NextResponse.json(workflow);
 }

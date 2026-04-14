@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser, isAdmin } from "@/lib/rbac";
+import { logAction } from "@/lib/audit";
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -19,6 +20,9 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       data: updateData,
       select: { id: true, name: true, email: true, role: true, isActive: true },
     });
+
+    logAction({ userId: currentUser.id, action: "team.update_member", entity: "user", entityId: id, details: { targetName: user.name, targetEmail: user.email, changes: updateData } }).catch(() => {});
+
     return NextResponse.json(user);
   } catch (e) {
     console.error("[/api/enterprise/team/[id] PUT]", e);

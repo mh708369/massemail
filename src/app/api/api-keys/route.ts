@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import crypto from "node:crypto";
+import { getCurrentUser } from "@/lib/rbac";
+import { logAction } from "@/lib/audit";
 
 export async function GET() {
   const keys = await prisma.apiKey.findMany({
@@ -36,6 +38,11 @@ export async function POST(req: Request) {
       userId: firstUser?.id || null,
     },
   });
+
+  const user = await getCurrentUser();
+  if (user) {
+    logAction({ userId: user.id, action: "api_key.create", entity: "api_key", entityId: apiKey.id, details: { name } }).catch(() => {});
+  }
 
   // Return the FULL key only once on creation (so user can copy it)
   return NextResponse.json({ ...apiKey, plaintextKey: key });

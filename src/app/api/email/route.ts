@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendEmail, sendBulkEmail } from "@/lib/email";
 import { getCurrentUser, isAdmin } from "@/lib/rbac";
+import { logAction } from "@/lib/audit";
 
 // GET /api/email — list emails (inbox)
 // Uses raw SQL scoping for userId so a stale Prisma client can't break it.
@@ -130,6 +131,11 @@ export async function POST(req: Request) {
       templateId: body.templateId as string | undefined,
       senderUserId,
     });
+
+    if (user) {
+      logAction({ userId: user.id, action: "email.bulk_send", entity: "email", details: { subject: body.subject, recipientCount: (body.contactIds as string[]).length } }).catch(() => {});
+    }
+
     return NextResponse.json({ results });
   }
 
@@ -147,6 +153,10 @@ export async function POST(req: Request) {
     senderUserId,
     attachments,
   });
+
+  if (user) {
+    logAction({ userId: user.id, action: "email.send", entity: "email", entityId: result?.id, details: { to: body.to, subject: body.subject, hasAttachments: !!attachments?.length } }).catch(() => {});
+  }
 
   return NextResponse.json(result);
 }

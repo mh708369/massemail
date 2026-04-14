@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/rbac";
+import { logAction } from "@/lib/audit";
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -18,6 +19,9 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     if (data.notes !== undefined) updateData.notes = data.notes;
 
     const target = await prisma.salesTarget.update({ where: { id }, data: updateData });
+
+    logAction({ userId: user.id, action: "sales_target.update", entity: "sales_target", entityId: id, details: { fields: Object.keys(updateData) } }).catch(() => {});
+
     return NextResponse.json(target);
   } catch (e) {
     console.error("[/api/sales/targets/[id] PUT]", e);
@@ -31,6 +35,9 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const { id } = await params;
     await prisma.salesTarget.delete({ where: { id } });
+
+    logAction({ userId: user.id, action: "sales_target.delete", entity: "sales_target", entityId: id }).catch(() => {});
+
     return NextResponse.json({ success: true });
   } catch (e) {
     console.error("[/api/sales/targets/[id] DELETE]", e);

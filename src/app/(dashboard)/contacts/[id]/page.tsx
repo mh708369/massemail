@@ -195,6 +195,7 @@ export default function ContactDetailPage() {
                       <SelectContent>
                         <SelectItem value="lead">Lead</SelectItem>
                         <SelectItem value="customer">Customer</SelectItem>
+                        <SelectItem value="training">Training</SelectItem>
                         <SelectItem value="churned">Churned</SelectItem>
                       </SelectContent>
                     </Select>

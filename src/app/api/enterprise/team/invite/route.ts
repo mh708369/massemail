@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser, isAdmin } from "@/lib/rbac";
 import bcrypt from "bcryptjs";
+import { logAction } from "@/lib/audit";
 
 export async function GET() {
   try {
@@ -35,6 +36,9 @@ export async function POST(req: Request) {
       const newUser = await prisma.user.create({
         data: { name, email, password: hashed, role: role || "agent" },
       });
+
+      logAction({ userId: user.id, action: "team.create_member", entity: "user", entityId: newUser.id, details: { name, email, role: role || "agent" } }).catch(() => {});
+
       return NextResponse.json({ user: newUser, method: "direct" });
     }
 
@@ -42,6 +46,9 @@ export async function POST(req: Request) {
     const invite = await prisma.teamInvite.create({
       data: { email, role: role || "agent", invitedById: user.id },
     });
+
+    logAction({ userId: user.id, action: "team.invite", entity: "team_invite", entityId: invite.id, details: { email, role: role || "agent" } }).catch(() => {});
+
     return NextResponse.json(invite);
   } catch (e) {
     console.error("[/api/enterprise/team/invite POST]", e);

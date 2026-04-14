@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser, isAdmin } from "@/lib/rbac";
+import { logAction } from "@/lib/audit";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -25,5 +26,11 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const data = await req.json();
   const ticket = await prisma.ticket.create({ data, include: { contact: true } });
+
+  const user = await getCurrentUser();
+  if (user) {
+    logAction({ userId: user.id, action: "ticket.create", entity: "ticket", entityId: ticket.id, details: { subject: data.subject, priority: data.priority, contactId: data.contactId } }).catch(() => {});
+  }
+
   return NextResponse.json(ticket);
 }

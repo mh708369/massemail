@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser, isAdmin } from "@/lib/rbac";
+import { logAction } from "@/lib/audit";
 
 export async function GET() {
   try {
@@ -70,6 +71,9 @@ export async function POST(req: Request) {
       notes: data.notes || null,
     },
   });
+
+  logAction({ userId: user!.id, action: "sales_target.create", entity: "sales_target", entityId: target.id, details: { period: data.period, targetAmount: data.targetAmount } }).catch(() => {});
+
   return NextResponse.json(target);
   } catch (e) {
     console.error("[/api/sales/targets POST]", e);

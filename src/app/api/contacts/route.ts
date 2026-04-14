@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser, isAdmin } from "@/lib/rbac";
 import { pickAndResolveOwner, resolveEffectiveOwner } from "@/lib/routing";
+import { logAction } from "@/lib/audit";
 
 // GET /api/contacts — admins see all; non-admins see only their owned contacts
 //                    (plus unassigned ones, so the team can pick them up).
@@ -174,6 +175,17 @@ export async function POST(req: Request) {
         where: { id: ownerId },
         select: { id: true, name: true, email: true },
       });
+    }
+
+    // Audit log
+    if (user) {
+      logAction({
+        userId: user.id,
+        action: "contact.create",
+        entity: "contact",
+        entityId: contact.id,
+        details: { name: contactData.name, email: contactData.email, source: contactData.source, ownerId },
+      }).catch(() => {});
     }
 
     return NextResponse.json({ ...contact, owner });

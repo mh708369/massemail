@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser, isAdmin } from "@/lib/rbac";
 import { getAllSettings, setSetting } from "@/lib/settings";
+import { logAction } from "@/lib/audit";
 
 /**
  * GET /api/settings/automation — returns all automation config
@@ -32,6 +33,8 @@ export async function PUT(req: Request) {
     if (body.stuckDeal) {
       await setSetting("stuck_deal_config", body.stuckDeal);
     }
+
+    logAction({ userId: user.id, action: "settings.update", entity: "settings", details: { keys: Object.keys(body) } }).catch(() => {});
 
     const updated = await getAllSettings();
     return NextResponse.json({ success: true, ...updated });

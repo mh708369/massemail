@@ -361,9 +361,10 @@ export default function MassEmailPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="all">All contacts</SelectItem>
                 <SelectItem value="lead">Leads only</SelectItem>
                 <SelectItem value="customer">Customers only</SelectItem>
+                <SelectItem value="training">Training only</SelectItem>
                 <SelectItem value="churned">Churned only</SelectItem>
               </SelectContent>
             </Select>
@@ -381,6 +382,7 @@ export default function MassEmailPage() {
                   const statusColors: Record<string, string> = {
                     customer: "bg-emerald-500/10 text-emerald-300",
                     lead: "bg-blue-500/10 text-blue-300",
+                    training: "bg-amber-500/10 text-amber-300",
                     churned: "bg-rose-500/10 text-rose-300",
                   };
                   return (

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/rbac";
+import { logAction } from "@/lib/audit";
 
 // SLA targets in minutes by priority
 const SLA_FIRST_RESPONSE: Record<string, number> = {
@@ -110,11 +112,28 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     }
   }
 
+  // Audit log
+  const user = await getCurrentUser();
+  if (user) {
+    const changes: Record<string, unknown> = { subject: ticket.subject };
+    if (data.status && data.status !== existing.status) changes.statusChange = { from: existing.status, to: data.status };
+    if (data.assignedToId && data.assignedToId !== existing.assignedToId) changes.assignedTo = data.assignedToId;
+    if (data.priority && data.priority !== existing.priority) changes.priorityChange = { from: existing.priority, to: data.priority };
+    logAction({ userId: user.id, action: "ticket.update", entity: "ticket", entityId: id, details: changes }).catch(() => {});
+  }
+
   return NextResponse.json(ticket);
 }
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const ticket = await prisma.ticket.findUnique({ where: { id }, select: { subject: true } });
   await prisma.ticket.delete({ where: { id } });
+
+  const user = await getCurrentUser();
+  if (user) {
+    logAction({ userId: user.id, action: "ticket.delete", entity: "ticket", entityId: id, details: { subject: ticket?.subject } }).catch(() => {});
+  }
+
   return NextResponse.json({ success: true });
 }

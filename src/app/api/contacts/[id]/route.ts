@@ -145,6 +145,17 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         })
       : null;
 
+    // Audit-log update
+    if (user && Object.keys(updateData).length > 0) {
+      logAction({
+        userId: user.id,
+        action: "contact.update",
+        entity: "contact",
+        entityId: id,
+        details: { fields: Object.keys(updateData) },
+      }).catch(() => {});
+    }
+
     // Audit-log ownership change
     if (user && newOwnerId !== undefined && prevOwnerId !== newOwnerId) {
       await logAction({
@@ -174,7 +185,20 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
     if (!(await userCanAccess(id))) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
+    const contact = await prisma.contact.findUnique({ where: { id }, select: { name: true, email: true } });
     await prisma.contact.delete({ where: { id } });
+
+    const user = await getCurrentUser();
+    if (user) {
+      logAction({
+        userId: user.id,
+        action: "contact.delete",
+        entity: "contact",
+        entityId: id,
+        details: { name: contact?.name, email: contact?.email },
+      }).catch(() => {});
+    }
+
     return NextResponse.json({ success: true });
   } catch (e) {
     console.error("[/api/contacts/[id] DELETE]", e);

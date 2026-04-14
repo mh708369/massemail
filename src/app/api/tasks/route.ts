@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/rbac";
+import { logAction } from "@/lib/audit";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -38,6 +39,8 @@ export async function POST(req: Request) {
       userId: user.id,
     },
   });
+
+  logAction({ userId: user.id, action: "task.create", entity: "task", entityId: task.id, details: { title: data.title, priority: data.priority } }).catch(() => {});
 
   return NextResponse.json(task);
 }

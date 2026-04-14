@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import crypto from "node:crypto";
+import { getCurrentUser } from "@/lib/rbac";
+import { logAction } from "@/lib/audit";
 
 export async function GET() {
   const webhooks = await prisma.webhook.findMany({ orderBy: { createdAt: "desc" } });
@@ -20,6 +22,11 @@ export async function POST(req: Request) {
       secret,
     },
   });
+
+  const user = await getCurrentUser();
+  if (user) {
+    logAction({ userId: user.id, action: "webhook.create", entity: "webhook", entityId: webhook.id, details: { name, url, events } }).catch(() => {});
+  }
 
   return NextResponse.json(webhook);
 }

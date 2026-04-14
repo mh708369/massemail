@@ -242,6 +242,7 @@ export default function ContactsPage() {
   const statusColors: Record<string, { bg: string; dot: string }> = {
     customer: { bg: "bg-emerald-500/10 text-emerald-300", dot: "bg-emerald-500" },
     lead: { bg: "bg-blue-500/10 text-blue-300", dot: "bg-blue-500" },
+    training: { bg: "bg-amber-500/10 text-amber-300", dot: "bg-amber-500" },
     churned: { bg: "bg-rose-500/10 text-rose-300", dot: "bg-rose-500" },
   };
 
@@ -249,6 +250,7 @@ export default function ContactsPage() {
     total: contacts.length,
     leads: contacts.filter((c) => c.status === "lead").length,
     customers: contacts.filter((c) => c.status === "customer").length,
+    training: contacts.filter((c) => c.status === "training").length,
     churned: contacts.filter((c) => c.status === "churned").length,
   };
 
@@ -256,7 +258,7 @@ export default function ContactsPage() {
     <>
       <Header
         title="Contacts"
-        subtitle={`${stats.total} total · ${stats.leads} leads · ${stats.customers} customers`}
+        subtitle={`${stats.total} total · ${stats.leads} leads · ${stats.customers} customers · ${stats.training} training`}
         actions={
           <>
             <button
@@ -464,6 +466,7 @@ export default function ContactsPage() {
                         <SelectContent>
                           <SelectItem value="lead">Lead</SelectItem>
                           <SelectItem value="customer">Customer</SelectItem>
+                          <SelectItem value="training">Training</SelectItem>
                           <SelectItem value="churned">Churned</SelectItem>
                         </SelectContent>
                       </Select>
@@ -485,7 +488,7 @@ export default function ContactsPage() {
 
       <div className="p-8 space-y-5 animate-fade-in max-w-[1400px]">
         {/* ── Stat tiles ─────────────── */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
           <button
             onClick={() => setStatusFilter("all")}
             className={cn(
@@ -532,6 +535,21 @@ export default function ContactsPage() {
           </button>
 
           <button
+            onClick={() => setStatusFilter("training")}
+            className={cn(
+              "text-left bg-card rounded-xl p-4 border transition-all hover:shadow-md cursor-pointer",
+              statusFilter === "training" ? "border-amber-500 shadow-glow ring-1 ring-amber-500/20" : "border-border/60 shadow-xs"
+            )}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] font-bold text-muted-foreground tracking-wider uppercase">Training</span>
+              <span className="status-dot bg-amber-500" />
+            </div>
+            <p className="text-2xl font-bold nums-tabular text-amber-300">{stats.training}</p>
+            <p className="text-[10px] text-muted-foreground mt-1">Training contacts</p>
+          </button>
+
+          <button
             onClick={() => setStatusFilter("churned")}
             className={cn(
               "text-left bg-card rounded-xl p-4 border transition-all hover:shadow-md cursor-pointer",
@@ -565,6 +583,12 @@ export default function ContactsPage() {
               className="h-7 px-2.5 rounded-md text-[11px] font-semibold border border-border bg-card hover:bg-accent"
             >
               Mark as Customer
+            </button>
+            <button
+              onClick={() => bulkAction("update_status", "training")}
+              className="h-7 px-2.5 rounded-md text-[11px] font-semibold border border-border bg-card hover:bg-accent"
+            >
+              Mark as Training
             </button>
             {isAdminUser && team.length > 0 && (
               <Select

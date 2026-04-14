@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/rbac";
+import { logAction } from "@/lib/audit";
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -40,11 +42,23 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     include: { steps: { orderBy: { stepOrder: "asc" } } },
   });
 
+  const user = await getCurrentUser();
+  if (user) {
+    logAction({ userId: user.id, action: "followup.update", entity: "follow_up", entityId: id, details: { name: sequence.name } }).catch(() => {});
+  }
+
   return NextResponse.json(sequence);
 }
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const seq = await prisma.followUpSequence.findUnique({ where: { id }, select: { name: true } });
   await prisma.followUpSequence.delete({ where: { id } });
+
+  const user = await getCurrentUser();
+  if (user) {
+    logAction({ userId: user.id, action: "followup.delete", entity: "follow_up", entityId: id, details: { name: seq?.name } }).catch(() => {});
+  }
+
   return NextResponse.json({ success: true });
 }

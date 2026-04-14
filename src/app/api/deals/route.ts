@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser, scopeFilter } from "@/lib/rbac";
+import { logAction } from "@/lib/audit";
 
 export async function GET(req: Request) {
   try {
@@ -55,6 +56,15 @@ export async function POST(req: Request) {
       },
       include: { contact: true, owner: true, campaign: true },
     });
+
+    logAction({
+      userId: user.id,
+      action: "deal.create",
+      entity: "deal",
+      entityId: deal.id,
+      details: { title: data.title, value: deal.value, stage: deal.stage, contactId: data.contactId },
+    }).catch(() => {});
+
     return NextResponse.json(deal);
   } catch (e) {
     console.error("[/api/deals POST]", e);

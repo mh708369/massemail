@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/rbac";
+import { logAction } from "@/lib/audit";
 
 export async function GET() {
   const sequences = await prisma.followUpSequence.findMany({
@@ -33,6 +35,11 @@ export async function POST(req: Request) {
     },
     include: { steps: { orderBy: { stepOrder: "asc" } } },
   });
+
+  const user = await getCurrentUser();
+  if (user) {
+    logAction({ userId: user.id, action: "followup.create", entity: "follow_up", entityId: sequence.id, details: { name, triggerEvent, stepsCount: steps?.length || 0 } }).catch(() => {});
+  }
 
   return NextResponse.json(sequence);
 }

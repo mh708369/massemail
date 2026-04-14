@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { triggerOnboardingForWonDeal } from "@/lib/sales";
+import { getCurrentUser } from "@/lib/rbac";
+import { logAction } from "@/lib/audit";
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -108,11 +110,39 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     }
   }
 
+  // Audit log stage transition or update
+  const user = await getCurrentUser();
+  if (user) {
+    logAction({
+      userId: user.id,
+      action: isStageTransition ? "deal.stage_change" : "deal.update",
+      entity: "deal",
+      entityId: id,
+      details: {
+        title: deal.title,
+        ...(isStageTransition ? { from: existing?.stage, to: data.stage } : { fields: Object.keys(data) }),
+      },
+    }).catch(() => {});
+  }
+
   return NextResponse.json(deal);
 }
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const deal = await prisma.deal.findUnique({ where: { id }, select: { title: true, value: true } });
   await prisma.deal.delete({ where: { id } });
+
+  const user = await getCurrentUser();
+  if (user) {
+    logAction({
+      userId: user.id,
+      action: "deal.delete",
+      entity: "deal",
+      entityId: id,
+      details: { title: deal?.title, value: deal?.value },
+    }).catch(() => {});
+  }
+
   return NextResponse.json({ success: true });
 }
