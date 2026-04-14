@@ -418,7 +418,7 @@ export default function ContactTimelinePage() {
                 <div className="flex-1">
                   <h3 className="text-[13px] font-semibold">Send Message</h3>
                   <p className="text-[10px] text-muted-foreground">
-                    Sent from <strong>cloud@synergificsoftware.com</strong> · You&apos;re CC&apos;d · vinay.chandra BCC&apos;d
+                    Sent from <strong>cloud@synergificsoftware.com</strong> · You&apos;re CC&apos;d · itops BCC&apos;d
                   </p>
                 </div>
                 {/* Channel pills */}
