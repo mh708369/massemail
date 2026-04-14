@@ -72,7 +72,7 @@ Classification rules:
 - "neutral" — Generic acknowledgment, out-of-office, unclear intent, or routing reply
 
 For the suggested reply:
-- POSITIVE: Thank them warmly, confirm next steps, mention that our IT Operations team (itops@synergificsoftware.com) has been added to coordinate further. Include a CTA to share their availability.
+- POSITIVE: Thank them warmly, confirm next steps, mention that our IT Operations team (vinay.chandra@synergificsoftware.com) has been added to coordinate further. Include a CTA to share their availability.
 - NEGATIVE: Be respectful and gracious. Ask politely what their specific challenges or current solutions are, so we can understand whether we can serve them in the future. Don't push.
 - QUESTION: Answer their question concisely if you can infer the answer, OR offer to set up a quick call with our specialist. Always suggest visiting synergificsoftware.com or store.synergificsoftware.com for more details.
 - NEUTRAL: Send a brief acknowledgment and gently re-state the value proposition with a soft CTA.

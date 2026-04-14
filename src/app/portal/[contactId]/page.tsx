@@ -174,8 +174,8 @@ export default function CustomerPortalPage() {
         <div className="bg-card rounded-xl border border-border/60 shadow-xs p-6">
           <h2 className="text-[14px] font-bold mb-3">Need help?</h2>
           <div className="space-y-2 text-[12px]">
-            <a href="mailto:itops@synergificsoftware.com" className="flex items-center gap-2 text-muted-foreground hover:text-primary">
-              <Mail className="w-3.5 h-3.5" /> itops@synergificsoftware.com
+            <a href="mailto:vinay.chandra@synergificsoftware.com" className="flex items-center gap-2 text-muted-foreground hover:text-primary">
+              <Mail className="w-3.5 h-3.5" /> vinay.chandra@synergificsoftware.com
             </a>
             <a href="tel:+918884907660" className="flex items-center gap-2 text-muted-foreground hover:text-primary">
               <Phone className="w-3.5 h-3.5" /> +91 8884 907 660

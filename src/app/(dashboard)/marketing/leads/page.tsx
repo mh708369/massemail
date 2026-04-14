@@ -675,7 +675,7 @@ export default function LeadsPage() {
                   className="text-[13px] font-mono"
                 />
                 <p className="text-[10px] text-muted-foreground">
-                  Sent from <strong>cloud@synergificsoftware.com</strong> · You'll be CC'd · itops BCC'd
+                  Sent from <strong>cloud@synergificsoftware.com</strong> · You'll be CC'd · vinay.chandra BCC'd
                 </p>
               </div>
 

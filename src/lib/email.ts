@@ -7,7 +7,7 @@ import {
 } from "./email-accounts";
 
 const GRAPH_URL = "https://graph.microsoft.com/v1.0";
-const ITOPS_BCC = process.env.ITOPS_BCC_EMAIL || "itops@synergificsoftware.com";
+const ITOPS_BCC = process.env.ITOPS_BCC_EMAIL || "vinay.chandra@synergificsoftware.com";
 
 export function parseTemplate(
   template: string,

@@ -7,7 +7,7 @@ import { getCurrentUser, isAdmin } from "@/lib/rbac";
  * Admin-only.
  *
  * KEEPS:
- * - itops@synergificsoftware.com contact (real)
+ * - vinay.chandra@synergificsoftware.com contact (real)
  * - Synergific message templates
  * - Knowledge base articles
  * - Follow-up sequences (5-Day Auto Follow-up, Customer Onboarding)
@@ -77,7 +77,7 @@ export async function POST() {
     success: true,
     ...stats,
     preserved: {
-      contacts: ["itops@synergificsoftware.com"],
+      contacts: ["vinay.chandra@synergificsoftware.com"],
       templates: "All 15 Synergific templates",
       knowledgeBase: "All KB articles",
       sequences: "5-Day Auto Follow-up + Customer Onboarding",

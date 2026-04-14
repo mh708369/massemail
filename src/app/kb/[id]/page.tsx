@@ -113,7 +113,7 @@ export default function KbArticlePage() {
           <h2 className="text-[14px] font-bold mb-2">Still need help?</h2>
           <div className="flex gap-3 justify-center mt-3">
             <a
-              href="mailto:itops@synergificsoftware.com"
+              href="mailto:vinay.chandra@synergificsoftware.com"
               className="h-9 px-4 rounded-md flex items-center gap-2 text-[12px] font-semibold bg-foreground text-background hover:opacity-90"
             >
               <Mail className="w-3.5 h-3.5" /> Email Support

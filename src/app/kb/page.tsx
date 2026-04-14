@@ -138,7 +138,7 @@ export default function KbPage() {
           <p className="text-[12px] text-muted-foreground mb-4">Our team is here to support you</p>
           <div className="flex gap-3 justify-center">
             <a
-              href="mailto:itops@synergificsoftware.com"
+              href="mailto:vinay.chandra@synergificsoftware.com"
               className="h-9 px-4 rounded-md flex items-center gap-2 text-[12px] font-semibold bg-foreground text-background hover:opacity-90"
             >
               <Mail className="w-3.5 h-3.5" /> Email Support
