@@ -235,13 +235,6 @@ export async function sendEmail({
       message: {
         subject,
         body: { contentType: "HTML", content: trackedBody },
-        // Set explicit from display name for professional appearance
-        from: {
-          emailAddress: {
-            address: ctx.fromAddress,
-            name: "Synergific Cloud Team",
-          },
-        },
         toRecipients: [{ emailAddress: { address: to } }],
         ...(ccList.length > 0
           ? { ccRecipients: ccList.map((addr) => ({ emailAddress: { address: addr } })) }
@@ -282,10 +275,43 @@ export async function sendEmail({
 
     if (!res.ok) {
       const errorText = await res.text();
+      console.error(`[sendEmail] Graph API FAILED — to: ${to}, status: ${res.status}, mode: ${ctx.mode}, error: ${errorText}`);
       await prisma.emailMessage.update({
         where: { id: emailRecord.id },
         data: { status: "failed" },
       });
+
+      // If the error is due to internetMessageHeaders, retry without them
+      if (errorText.includes("InternetMessageHeader") || errorText.includes("invalidRequest") || res.status === 400) {
+        console.log(`[sendEmail] Retrying without custom headers for ${to}...`);
+        delete (message.message as Record<string, unknown>).internetMessageHeaders;
+        const retryRes = await fetch(`${GRAPH_URL}${ctx.graphUserPath}/sendMail`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${ctx.token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(message),
+        });
+        if (retryRes.ok) {
+          await prisma.emailMessage.update({
+            where: { id: emailRecord.id },
+            data: { status: "sent", sentAt: new Date() },
+          });
+          await prisma.contact.update({
+            where: { id: contactId },
+            data: { lastContactedAt: new Date() },
+          });
+          if (autoFollowUp && !followUpExecId) {
+            const { scheduleAutoFollowUp } = await import("./follow-up");
+            await scheduleAutoFollowUp(contactId);
+          }
+          return { success: true, emailId: emailRecord.id, mode: ctx.mode, from: ctx.fromAddress };
+        }
+        const retryError = await retryRes.text();
+        console.error(`[sendEmail] Retry also failed: ${retryRes.status} ${retryError}`);
+      }
+
       throw new Error(`Graph API error (${ctx.mode}): ${res.status} ${errorText}`);
     }
 
