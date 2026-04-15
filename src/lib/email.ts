@@ -8,6 +8,48 @@ import {
 
 const GRAPH_URL = "https://graph.microsoft.com/v1.0";
 const ITOPS_BCC = process.env.ITOPS_BCC_EMAIL || "itops@synergificsoftware.com";
+const UNSUBSCRIBE_EMAIL = "cloud@synergificsoftware.com";
+
+/**
+ * Build the unsubscribe footer that gets appended to every outbound marketing email.
+ * Having a visible unsubscribe option drastically improves deliverability.
+ */
+function buildUnsubscribeFooter(recipientEmail: string): string {
+  return `
+<div style="margin-top:32px;padding-top:16px;border-top:1px solid #e5e7eb;font-size:11px;color:#9ca3af;line-height:1.6;text-align:center;">
+  <p style="margin:0;">You are receiving this email because you are a contact of Synergific Software Pvt. Ltd.</p>
+  <p style="margin:4px 0 0 0;">
+    If you no longer wish to receive these emails, please reply with "UNSUBSCRIBE" or
+    <a href="mailto:${UNSUBSCRIBE_EMAIL}?subject=Unsubscribe&body=Please%20unsubscribe%20${encodeURIComponent(recipientEmail)}" style="color:#6b7280;text-decoration:underline;">click here to unsubscribe</a>.
+  </p>
+  <p style="margin:4px 0 0 0;">Synergific Software Pvt. Ltd. · Bengaluru, India</p>
+</div>`;
+}
+
+/**
+ * Build deliverability-improving internet message headers.
+ * These headers signal to mail servers that the email is legitimate.
+ */
+function buildDeliverabilityHeaders(recipientEmail: string): Array<{ name: string; value: string }> {
+  return [
+    {
+      name: "List-Unsubscribe",
+      value: `<mailto:${UNSUBSCRIBE_EMAIL}?subject=Unsubscribe%20${encodeURIComponent(recipientEmail)}>`,
+    },
+    {
+      name: "List-Unsubscribe-Post",
+      value: "List-Unsubscribe=One-Click",
+    },
+    {
+      name: "Precedence",
+      value: "bulk",
+    },
+    {
+      name: "X-Auto-Response-Suppress",
+      value: "OOF, AutoReply",
+    },
+  ];
+}
 
 export function parseTemplate(
   template: string,
@@ -153,8 +195,11 @@ export async function sendEmail({
       console.error("[sendEmail] raw patch userId/bccAddr failed:", e);
     }
 
+    // Add unsubscribe footer for deliverability
+    const bodyWithFooter = body + buildUnsubscribeFooter(to);
+
     // Inject tracking pixel + rewrite links to go through click tracker
-    let trackedBody = body;
+    let trackedBody = bodyWithFooter;
     trackedBody = trackedBody.replace(
       /<a([^>]*?)href=(["'])([^"']+?)\2/gi,
       (match, attrs, quote, url) => {
@@ -175,10 +220,30 @@ export async function sendEmail({
       contentBytes: a.contentBytes,
     }));
 
+    // Strip HTML for plain-text alternative (helps deliverability)
+    const plainText = trackedBody
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&#39;/g, "'")
+      .replace(/&quot;/g, '"')
+      .replace(/\s{2,}/g, " ")
+      .trim();
+
     const message = {
       message: {
         subject,
         body: { contentType: "HTML", content: trackedBody },
+        // Set explicit from display name for professional appearance
+        from: {
+          emailAddress: {
+            address: ctx.fromAddress,
+            name: "Synergific Cloud Team",
+          },
+        },
         toRecipients: [{ emailAddress: { address: to } }],
         ...(ccList.length > 0
           ? { ccRecipients: ccList.map((addr) => ({ emailAddress: { address: addr } })) }
@@ -190,6 +255,9 @@ export async function sendEmail({
           ? { replyTo: [{ emailAddress: { address: replyTo } }] }
           : {}),
         ...(graphAttachments.length > 0 ? { attachments: graphAttachments } : {}),
+        // Deliverability headers: List-Unsubscribe, Precedence, etc.
+        internetMessageHeaders: buildDeliverabilityHeaders(to),
+        importance: "normal",
       },
       saveToSentItems: true,
     };
