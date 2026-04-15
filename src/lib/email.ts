@@ -28,7 +28,7 @@ function buildUnsubscribeFooter(recipientEmail: string): string {
 
 /**
  * Build deliverability-improving internet message headers.
- * These headers signal to mail servers that the email is legitimate.
+ * Uses mailto-based List-Unsubscribe (RFC 2369) so no external domain is needed.
  */
 function buildDeliverabilityHeaders(recipientEmail: string): Array<{ name: string; value: string }> {
   return [
@@ -39,10 +39,6 @@ function buildDeliverabilityHeaders(recipientEmail: string): Array<{ name: strin
     {
       name: "List-Unsubscribe-Post",
       value: "List-Unsubscribe=One-Click",
-    },
-    {
-      name: "Precedence",
-      value: "bulk",
     },
     {
       name: "X-Auto-Response-Suppress",
@@ -198,19 +194,34 @@ export async function sendEmail({
     // Add unsubscribe footer for deliverability
     const bodyWithFooter = body + buildUnsubscribeFooter(to);
 
-    // Inject tracking pixel + rewrite links to go through click tracker
+    // Only enable tracking (link rewriting + open pixel) when the tracking
+    // domain matches the sending domain. If they differ (e.g. tracking on
+    // mail.getlabs.cloud but sending from synergificsoftware.com) it causes
+    // a domain mismatch that spam filters treat as phishing.
+    const trackingDomain = process.env.TRACKING_DOMAIN || "";
+    const senderDomain = ctx.fromAddress.split("@")[1]?.toLowerCase() || "";
+    const trackingBaseUrl = trackingDomain || baseUrl;
+    const trackingDomainHost = (() => {
+      try { return new URL(trackingBaseUrl).hostname.toLowerCase(); } catch { return ""; }
+    })();
+    const enableTracking = trackingDomainHost.endsWith(senderDomain) || senderDomain.endsWith(trackingDomainHost);
+
     let trackedBody = bodyWithFooter;
-    trackedBody = trackedBody.replace(
-      /<a([^>]*?)href=(["'])([^"']+?)\2/gi,
-      (match, attrs, quote, url) => {
-        if (url.startsWith("mailto:") || url.startsWith("tel:") || url.includes("/api/track/")) {
-          return match;
+    if (enableTracking) {
+      // Rewrite links to go through click tracker
+      trackedBody = trackedBody.replace(
+        /<a([^>]*?)href=(["'])([^"']+?)\2/gi,
+        (match, attrs, quote, url) => {
+          if (url.startsWith("mailto:") || url.startsWith("tel:") || url.includes("/api/track/")) {
+            return match;
+          }
+          const tracked = `${trackingBaseUrl}/api/track/click?m=${emailRecord.id}&u=${encodeURIComponent(url)}`;
+          return `<a${attrs}href=${quote}${tracked}${quote}`;
         }
-        const tracked = `${baseUrl}/api/track/click?m=${emailRecord.id}&u=${encodeURIComponent(url)}`;
-        return `<a${attrs}href=${quote}${tracked}${quote}`;
-      }
-    );
-    trackedBody += `<img src="${baseUrl}/api/track/open/${emailRecord.id}" width="1" height="1" alt="" style="display:none;" />`;
+      );
+      // Open tracking pixel
+      trackedBody += `<img src="${trackingBaseUrl}/api/track/open/${emailRecord.id}" width="1" height="1" alt="" style="display:none;" />`;
+    }
 
     // Build Graph API attachments array
     const graphAttachments = (attachments || []).map((a) => ({
@@ -219,19 +230,6 @@ export async function sendEmail({
       contentType: a.contentType,
       contentBytes: a.contentBytes,
     }));
-
-    // Strip HTML for plain-text alternative (helps deliverability)
-    const plainText = trackedBody
-      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
-      .replace(/<[^>]+>/g, " ")
-      .replace(/&nbsp;/g, " ")
-      .replace(/&amp;/g, "&")
-      .replace(/&lt;/g, "<")
-      .replace(/&gt;/g, ">")
-      .replace(/&#39;/g, "'")
-      .replace(/&quot;/g, '"')
-      .replace(/\s{2,}/g, " ")
-      .trim();
 
     const message = {
       message: {
@@ -255,9 +253,8 @@ export async function sendEmail({
           ? { replyTo: [{ emailAddress: { address: replyTo } }] }
           : {}),
         ...(graphAttachments.length > 0 ? { attachments: graphAttachments } : {}),
-        // Deliverability headers: List-Unsubscribe, Precedence, etc.
+        // Deliverability headers: List-Unsubscribe for inbox placement
         internetMessageHeaders: buildDeliverabilityHeaders(to),
-        importance: "normal",
       },
       saveToSentItems: true,
     };
