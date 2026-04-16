@@ -10,7 +10,61 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sparkles, Loader2, Wand2, Copy, Check } from "lucide-react";
+import { Sparkles, Loader2, Wand2, Copy, Check, Zap, Tag } from "lucide-react";
+
+// Pre-built keyword suggestions for Indian IT lab/voucher/training market
+const KEYWORD_SUGGESTIONS: Record<string, Array<{ label: string; keywords: string; audience: string; tone: string; category: string }>> = {
+  "Practice Labs": [
+    { label: "Azure Labs Launch", keywords: "Azure practice labs, hands-on cloud lab environment, Azure VM, Azure AD, Azure DevOps, sandbox labs, pay-as-you-go lab access, learn by doing", audience: "training", tone: "persuasive", category: "Labs" },
+    { label: "AWS Labs Promo", keywords: "AWS practice labs, EC2 sandbox, S3 hands-on, Lambda lab environment, AWS certification preparation labs, real cloud console access", audience: "training", tone: "persuasive", category: "Labs" },
+    { label: "Multi-Cloud Lab Bundle", keywords: "multi-cloud practice labs bundle, Azure + AWS + GCP labs, cloud lab subscription, unlimited lab access, enterprise lab license, team lab environment", audience: "enterprise", tone: "professional", category: "Labs" },
+    { label: "Cisco Networking Labs", keywords: "Cisco CCNA practice labs, CCNP lab environment, networking simulation labs, switch router lab, packet tracer alternative, real device access", audience: "training", tone: "professional", category: "Labs" },
+    { label: "Cybersecurity Labs", keywords: "cybersecurity practice labs, ethical hacking lab, penetration testing environment, Kali Linux lab, SOC analyst training lab, SIEM lab access", audience: "training", tone: "urgent", category: "Labs" },
+    { label: "DevOps Labs", keywords: "DevOps practice labs, Docker Kubernetes hands-on, CI/CD pipeline lab, Jenkins lab, Terraform lab, Ansible automation lab, GitOps practice", audience: "training", tone: "professional", category: "Labs" },
+    { label: "Data Science Labs", keywords: "data science practice labs, Python ML lab, TensorFlow PyTorch environment, Jupyter notebook cloud lab, AI ML hands-on training lab", audience: "training", tone: "friendly", category: "Labs" },
+    { label: "Lab Trial Offer", keywords: "free lab trial, 7-day free practice lab access, try before you buy, no credit card required, instant lab activation, start practicing today", audience: "leads", tone: "persuasive", category: "Labs" },
+  ],
+  "Certification Vouchers": [
+    { label: "Microsoft Vouchers", keywords: "Microsoft certification exam vouchers, AZ-900 AZ-104 AZ-204 AZ-500 exam voucher, discounted Microsoft cert voucher, bulk exam voucher pricing", audience: "training", tone: "persuasive", category: "Vouchers" },
+    { label: "AWS Cert Vouchers", keywords: "AWS certification exam vouchers, Solutions Architect voucher, AWS Cloud Practitioner exam discount, SAA-C03 voucher, bulk AWS voucher deal", audience: "training", tone: "persuasive", category: "Vouchers" },
+    { label: "CompTIA Vouchers", keywords: "CompTIA certification vouchers, A+ Security+ Network+ exam voucher, CompTIA CySA+ PenTest+ voucher, best price CompTIA exam India", audience: "training", tone: "persuasive", category: "Vouchers" },
+    { label: "Google Cloud Vouchers", keywords: "Google Cloud certification voucher, GCP Associate Cloud Engineer exam voucher, Professional Data Engineer voucher, GCP cert discount India", audience: "training", tone: "professional", category: "Vouchers" },
+    { label: "Bulk Voucher Deal", keywords: "bulk certification exam vouchers, volume discount vouchers, corporate exam voucher package, 10+ vouchers special pricing, team certification program", audience: "enterprise", tone: "professional", category: "Vouchers" },
+    { label: "Voucher + Lab Combo", keywords: "certification voucher with practice lab combo, exam voucher plus lab access bundle, all-in-one certification package, study material + voucher + lab", audience: "training", tone: "persuasive", category: "Vouchers" },
+    { label: "Last Chance Voucher", keywords: "limited time voucher offer, exam voucher expiring soon, last chance certification discount, flash sale exam vouchers, hurry limited stock", audience: "leads", tone: "urgent", category: "Vouchers" },
+  ],
+  "Corporate Training": [
+    { label: "Cloud Migration Training", keywords: "cloud migration training program, Azure AWS migration workshop, lift and shift training, cloud adoption framework, enterprise cloud readiness", audience: "enterprise", tone: "professional", category: "Training" },
+    { label: "Upskilling Program", keywords: "employee upskilling program, IT workforce development, cloud skills training, digital skills bootcamp, reskilling initiative, skill gap analysis", audience: "enterprise", tone: "professional", category: "Training" },
+    { label: "College Partnership", keywords: "college university training partnership, campus placement training, student certification program, academic lab license, MOU training partnership", audience: "partners", tone: "formal", category: "Training" },
+    { label: "Govt Training Program", keywords: "government IT training, NSDC skill development, Skill India certified training, PMKVY program, state government training tender", audience: "enterprise", tone: "formal", category: "Training" },
+    { label: "Bootcamp Launch", keywords: "IT bootcamp, 3-month intensive cloud bootcamp, full stack development bootcamp, job-ready training program, placement guaranteed bootcamp", audience: "leads", tone: "persuasive", category: "Training" },
+    { label: "Weekend Batches", keywords: "weekend certification batch, Saturday Sunday training classes, working professionals training, part-time IT course, flexible schedule training", audience: "leads", tone: "friendly", category: "Training" },
+    { label: "Custom Training", keywords: "customized corporate training, tailored IT training program, onsite training delivery, virtual instructor-led training VILT, training needs assessment", audience: "enterprise", tone: "professional", category: "Training" },
+  ],
+  "IT Services Pitch": [
+    { label: "Cloud Services", keywords: "managed cloud services India, cloud infrastructure management, Azure AWS managed services, 24x7 cloud support, cloud cost optimization", audience: "enterprise", tone: "professional", category: "IT Services" },
+    { label: "Digital Transformation", keywords: "digital transformation consulting, legacy modernization, cloud-first strategy, IT infrastructure upgrade, business process automation", audience: "enterprise", tone: "professional", category: "IT Services" },
+    { label: "Managed IT Services", keywords: "managed IT services, IT AMC annual maintenance contract, remote IT support, helpdesk services, IT infrastructure management India", audience: "enterprise", tone: "professional", category: "IT Services" },
+    { label: "Software Development", keywords: "custom software development India, web application development, mobile app development, API integration services, offshore development team", audience: "enterprise", tone: "professional", category: "IT Services" },
+    { label: "Cybersecurity Services", keywords: "cybersecurity consulting India, VAPT vulnerability assessment, SOC as a service, security audit compliance, ISO 27001 implementation", audience: "enterprise", tone: "professional", category: "IT Services" },
+  ],
+  "Promotions & Offers": [
+    { label: "Festive Season Sale", keywords: "Diwali special offer, festive season discount, festival sale certification voucher, limited period offer, special Navratri Dussehra deal", audience: "leads", tone: "persuasive", category: "Promotions" },
+    { label: "New Year Offer", keywords: "New Year career resolution, January certification discount, new year new skills, start 2025 with certification, new year learning offer", audience: "leads", tone: "persuasive", category: "Promotions" },
+    { label: "Student Discount", keywords: "student special discount, college student certification offer, fresher career starter pack, campus placement preparation, student ID discount", audience: "leads", tone: "friendly", category: "Promotions" },
+    { label: "Referral Program", keywords: "refer and earn, bring a friend discount, referral bonus certification, group enrollment discount, team learning reward", audience: "customers", tone: "friendly", category: "Promotions" },
+    { label: "Early Bird Offer", keywords: "early bird registration discount, advance booking offer, first 50 registrations special price, early signup bonus, limited seats", audience: "leads", tone: "urgent", category: "Promotions" },
+    { label: "Flash Sale", keywords: "24-hour flash sale, today only certification deal, midnight offer, limited time 50% off, grab before it's gone, countdown sale", audience: "leads", tone: "urgent", category: "Promotions" },
+  ],
+  "Follow-up & Nurture": [
+    { label: "Post-Demo Follow-up", keywords: "follow up after demo, thank you for attending demo, next steps after product demo, ready to get started, schedule pilot", audience: "leads", tone: "professional", category: "Follow-up" },
+    { label: "Abandoned Cart", keywords: "you left items in cart, complete your purchase, your certification voucher is waiting, finish checkout, we saved your selection", audience: "leads", tone: "friendly", category: "Follow-up" },
+    { label: "Re-engagement", keywords: "we miss you, it's been a while, new courses available, what's new at Synergific, come back special offer", audience: "customers", tone: "friendly", category: "Follow-up" },
+    { label: "Post-Training", keywords: "congratulations on completing training, next certification to pursue, advanced course recommendation, alumni network, success story", audience: "customers", tone: "friendly", category: "Follow-up" },
+    { label: "Renewal Reminder", keywords: "lab subscription renewal, your access expiring soon, renew and save, continue your learning journey, don't lose your progress", audience: "customers", tone: "persuasive", category: "Follow-up" },
+  ],
+};
 
 interface Template {
   id: string;
@@ -200,6 +254,51 @@ export default function TemplatesPage() {
                 </DialogHeader>
 
                 <div className="space-y-5 mt-2">
+                  {/* Quick Pick Keywords */}
+                  {!aiGenerated && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Zap className="w-4 h-4 text-amber-500" />
+                        <p className="text-[13px] font-bold">Quick Pick Templates</p>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 font-bold border border-amber-500/20">
+                          {Object.values(KEYWORD_SUGGESTIONS).flat().length} ready-to-use
+                        </span>
+                      </div>
+                      <div className="max-h-[280px] overflow-y-auto pr-1 space-y-3">
+                        {Object.entries(KEYWORD_SUGGESTIONS).map(([category, items]) => (
+                          <div key={category}>
+                            <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                              <Tag className="w-3 h-3" />
+                              {category}
+                            </p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {items.map((item) => (
+                                <button
+                                  key={item.label}
+                                  onClick={() => {
+                                    setAiKeywords(item.keywords);
+                                    setAiAudience(item.audience);
+                                    setAiTone(item.tone);
+                                    setAiCategory(item.category);
+                                    setAiTemplateName(item.label);
+                                  }}
+                                  className={`text-[11px] px-2.5 py-1 rounded-full border transition-all hover:shadow-sm ${
+                                    aiKeywords === item.keywords
+                                      ? "bg-violet-500/15 border-violet-300 text-violet-700 font-bold"
+                                      : "bg-card border-border/60 text-foreground/80 hover:border-violet-300 hover:bg-violet-500/5 font-medium"
+                                  }`}
+                                >
+                                  {item.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="h-px bg-border/60" />
+                    </div>
+                  )}
+
                   {/* Step 1: Input keywords */}
                   <div className="space-y-4">
                     <div className="space-y-2">
@@ -208,10 +307,10 @@ export default function TemplatesPage() {
                         value={aiKeywords}
                         onChange={(e) => setAiKeywords(e.target.value)}
                         rows={3}
-                        placeholder="e.g. cloud migration services, digital transformation, IT training programs, web development, DevOps consulting..."
+                        placeholder="e.g. Azure practice labs, certification exam vouchers, CCNA lab environment, bulk voucher pricing, cloud bootcamp..."
                         className="text-[13px]"
                       />
-                      <p className="text-[11px] text-muted-foreground">Describe what the email should be about. Add multiple keywords separated by commas for better results.</p>
+                      <p className="text-[11px] text-muted-foreground">Pick from above or type your own keywords. More specific = better results.</p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
@@ -226,6 +325,8 @@ export default function TemplatesPage() {
                             <SelectItem value="enterprise">Enterprise Clients</SelectItem>
                             <SelectItem value="startups">Startups & SMBs</SelectItem>
                             <SelectItem value="partners">Partners & Resellers</SelectItem>
+                            <SelectItem value="colleges">Colleges & Universities</SelectItem>
+                            <SelectItem value="government">Government / PSU</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
