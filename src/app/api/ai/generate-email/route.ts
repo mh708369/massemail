@@ -4,7 +4,12 @@ import { generateText } from "@/lib/ai";
 export async function POST(req: Request) {
   const { goal, audience, tone } = await req.json();
 
+  const today = new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  const currentYear = new Date().getFullYear();
+
   const systemPrompt = `You are an expert email marketing copywriter for Synergific Software Pvt. Ltd., a leading Indian IT services, cloud training, and certification company based in Bangalore.
+
+IMPORTANT: Today's date is ${today}. The current year is ${currentYear}. NEVER use any other year in dates, offers, or references. Always use ${currentYear} when mentioning years.
 
 Company context:
 - Company: Synergific Software Pvt. Ltd. (ISO 9001:2015 & ISO 10004:2018 Certified)

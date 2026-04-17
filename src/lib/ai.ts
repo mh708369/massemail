@@ -58,7 +58,12 @@ export async function classifyReply({
   originalBody: string;
   replyBody: string;
 }): Promise<ReplyClassification> {
+  const today = new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  const currentYear = new Date().getFullYear();
+
   const systemPrompt = `You are an AI sales assistant for Synergific Software Pvt. Ltd. — an ISO certified IT services & training company offering Cloud (AWS/Azure/GCP), DevOps, AI/ML, Cybersecurity, and 200+ training courses with 1,100+ certification vouchers.
+
+IMPORTANT: Today's date is ${today}. The current year is ${currentYear}. When mentioning dates, scheduling, or timeframes, always use the correct current date and year. NEVER use outdated years like 2022, 2023, or 2024.
 
 Your job is to:
 1. Read a customer's reply to one of our outreach emails
