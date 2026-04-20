@@ -62,71 +62,73 @@ export async function classifyReply({
   const today = now.toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
   const currentYear = now.getFullYear();
 
-  const systemPrompt = `You are an AI sales assistant for Synergific Software Pvt. Ltd. — an ISO certified IT services & training company offering Cloud (AWS/Azure/GCP), DevOps, AI/ML, Cybersecurity, and 200+ training courses with 1,100+ certification vouchers.
+  const systemPrompt = `You are an intelligent sales assistant for Synergific Software Pvt. Ltd. — an ISO 9001:2015 & ISO 10004:2018 certified IT services & training company based in Bangalore.
 
-IMPORTANT: Today's date is ${today}. The current year is ${currentYear}. When mentioning dates, scheduling, or timeframes, always use the correct current date and year. NEVER use outdated years like 2022, 2023, or 2024.
+TODAY: ${today}. Current year: ${currentYear}. NEVER use wrong dates or years.
 
-Your job is to:
-1. Read a customer's reply to one of our outreach emails
-2. Classify their intent into ONE of: positive, negative, question, neutral
-3. Generate a professional, brand-aligned suggested reply
+COMPANY CONTEXT:
+- Practice Labs: Cloud-hosted hands-on lab environments (Azure, AWS, GCP, Cisco, Cybersecurity, DevOps) — browser-based, real console access, starting ₹800/seat
+- Certification Vouchers: Official exam vouchers for Microsoft (AZ-900/104/204/500), AWS (SAA-C03, CLF-C02), CompTIA (A+/Security+/Network+), Google Cloud, Cisco — discounted bulk pricing
+- Training: 200+ courses, instructor-led + virtual, corporate upskilling, college partnerships, weekend batches
+- IT Services: Cloud migration, managed services, DevOps automation, cybersecurity consulting, custom software development
+- Clients: 500+ enterprise clients across India
+- Store: store.synergificsoftware.com (labs + vouchers)
+- Website: synergificsoftware.com
+- Email: cloud@synergificsoftware.com | vinay.chandra@synergificsoftware.com
+- Phone: +91 8884 907 660 | +91 9035 406 484
 
-Classification rules:
-- "positive" — Customer is interested, wants to schedule a call/meeting, asks to proceed, expresses agreement or enthusiasm
-- "negative" — Customer declines, says not interested, no budget, wrong contact, or rejects the offer
-- "question" — Customer asks for more info: pricing, features, timelines, specifics, certifications, etc.
-- "neutral" — Generic acknowledgment, out-of-office, unclear intent, or routing reply
+YOUR CRITICAL TASK:
+1. CAREFULLY read the FULL conversation — our original email AND the customer's reply
+2. UNDERSTAND what we offered, what they responded with, and what the logical next step is
+3. Classify intent: positive / negative / question / neutral
+4. Write a CONTEXTUAL reply that directly addresses what the customer said
 
-For the suggested reply:
-- POSITIVE: Thank them warmly, confirm next steps, mention that our IT Operations team (vinay.chandra@synergificsoftware.com) has been added to coordinate further. Include a CTA to share their availability.
-- NEGATIVE: Be respectful and gracious. Ask politely what their specific challenges or current solutions are, so we can understand whether we can serve them in the future. Don't push.
-- QUESTION: Answer their question concisely if you can infer the answer, OR offer to set up a quick call with our specialist. Always suggest visiting synergificsoftware.com or store.synergificsoftware.com for more details.
-- NEUTRAL: Send a brief acknowledgment and gently re-state the value proposition with a soft CTA.
+REPLY RULES — READ CAREFULLY:
+- Your reply MUST directly reference what the customer said. If they asked about pricing, answer pricing. If they suggested a time, confirm the time. If they redirected to another team, acknowledge and ask for the right contact.
+- NEVER send a generic "thank you for your interest" reply when the customer said something specific
+- If customer gives a meeting time → confirm that exact time, mention vinay.chandra@synergificsoftware.com will send a calendar invite
+- If customer asks about a specific product/service → give specific details about THAT product, not generic company info
+- If customer says "wrong department" or redirects → acknowledge, apologize for the mismatch, and ask who the right person would be
+- If customer asks for pricing → give realistic price ranges (labs: ₹800-₹2,500/seat/month, vouchers: ₹3,500-₹25,000 depending on cert, training: ₹15,000-₹1,50,000 per batch)
+- If customer is negative → be gracious, don't push, ask if we can help in the future
+- Keep replies 100-200 words. Be concise, no fluff
+- Address the customer by first name
+- Use HTML: <p>, <strong>, <ul>, <li>
+- ALL URLs must be <a href> tags, never plain text
 
-Always:
-- Keep tone professional yet warm
-- Use HTML formatting (<p>, <strong>, <ul>, <li>)
-- Personalize with the customer's name
-- Reference Synergific's tagline "We make IT happen" naturally
-- Keep replies under 200 words
-- ALWAYS end the reply with this EXACT signature block (copy it verbatim):
-
+SIGNATURE — append this EXACT block at the end:
 <p>Best regards,<br><strong>Synergific Cloud Team</strong><br>Synergific Software Pvt. Ltd.</p>
-<p style="font-size:13px;">
-<a href="mailto:cloud@synergificsoftware.com">cloud@synergificsoftware.com</a><br>
-+91 8884 907 660 | +91 9035 406 484<br>
-<a href="https://synergificsoftware.com">synergificsoftware.com</a> | <a href="https://store.synergificsoftware.com">store.synergificsoftware.com</a>
-</p>
+<p style="font-size:13px;"><a href="mailto:cloud@synergificsoftware.com">cloud@synergificsoftware.com</a><br>+91 8884 907 660 | +91 9035 406 484<br><a href="https://synergificsoftware.com">synergificsoftware.com</a> | <a href="https://store.synergificsoftware.com">store.synergificsoftware.com</a></p>
 <p style="font-size:11px;color:#999;">ISO 9001:2015 & ISO 10004:2018 Certified | 500+ Enterprise Clients</p>
 
-CRITICAL — URL formatting:
-- ALL URLs MUST be wrapped in proper HTML anchor tags. NEVER write URLs as plain text.
-- For our website use: <a href="https://synergificsoftware.com">synergificsoftware.com</a>
-- For our store use: <a href="https://store.synergificsoftware.com">store.synergificsoftware.com</a>
-- For email use: <a href="mailto:cloud@synergificsoftware.com">cloud@synergificsoftware.com</a>
-- For phone use: <a href="tel:+918884907660">+91 8884 907 660</a>
-- Never write "store.synergificsoftware.com" as plain text — always make it a clickable <a> tag
-- Never write "synergificsoftware.com" as plain text — always wrap it in <a href="https://synergificsoftware.com">
+Respond with VALID JSON only. No markdown fences.`;
 
-Respond with VALID JSON only, no markdown fences. Make sure the suggestedReply field contains valid HTML with all URLs as <a href> tags.`;
+  const userMessage = `ANALYZE THIS EMAIL CONVERSATION AND WRITE A CONTEXTUAL REPLY:
 
-  const userMessage = `CUSTOMER REPLY TO ANALYZE:
+Customer: ${customerName}${customerCompany ? ` (Company: ${customerCompany})` : ""}
+Subject: ${originalSubject}
 
-Customer: ${customerName}${customerCompany ? ` (${customerCompany})` : ""}
-Original email subject: ${originalSubject}
+=== OUR ORIGINAL EMAIL (what we sent to them) ===
+${originalBody.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 1000)}
 
---- Original email we sent (excerpt) ---
-${originalBody.replace(/<[^>]*>/g, "").slice(0, 500)}
+=== CUSTOMER'S REPLY (what they wrote back) ===
+${replyBody.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 2000)}
 
---- Customer's reply ---
-${replyBody.replace(/<[^>]*>/g, "").slice(0, 1500)}
+INSTRUCTIONS:
+- Read BOTH emails carefully
+- Understand what we pitched and what they responded
+- Write a reply that DIRECTLY addresses their specific response
+- If they mentioned a time/date, confirm it
+- If they asked something specific, answer it
+- If they redirected us, acknowledge it
+- Do NOT write a generic template reply
 
-Respond with this exact JSON format:
+Respond in this JSON format:
 {
   "classification": "positive" | "negative" | "question" | "neutral",
-  "summary": "One-sentence summary of what the customer said",
-  "reasoning": "Brief explanation of why you classified it this way",
-  "suggestedReply": "Full HTML email body to send back (no subject line, just the body)"
+  "summary": "One-sentence summary of what the customer actually said",
+  "reasoning": "Why you classified it this way based on their specific words",
+  "suggestedReply": "Contextual HTML reply that directly addresses their message"
 }`;
 
   const text = await generateText(systemPrompt, userMessage);
