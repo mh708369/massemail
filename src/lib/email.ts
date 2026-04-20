@@ -535,16 +535,26 @@ async function syncSingleMailbox({
   ownerUserId: string | null;
   limit: number;
 }) {
-  const url = `${GRAPH_URL}${graphUserPath}/mailFolders/inbox/messages?$top=${limit}&$orderby=receivedDateTime desc&$select=id,conversationId,subject,bodyPreview,body,from,toRecipients,receivedDateTime,isRead,internetMessageId`;
+  // Paginate through Graph API to fetch ALL messages up to `limit`
+  // Graph API max per page is 250, so we loop through @odata.nextLink
+  const messages: GraphMessage[] = [];
+  const pageSize = Math.min(limit, 250);
+  let nextUrl: string | null = `${GRAPH_URL}${graphUserPath}/mailFolders/inbox/messages?$top=${pageSize}&$orderby=receivedDateTime desc&$select=id,conversationId,subject,bodyPreview,body,from,toRecipients,receivedDateTime,isRead,internetMessageId,inferenceClassification`;
 
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok) {
-    throw new Error(`Failed to fetch inbox for ${mailboxAddress}: ${res.status} ${await res.text()}`);
+  while (nextUrl && messages.length < limit) {
+    const res = await fetch(nextUrl, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch inbox for ${mailboxAddress}: ${res.status} ${await res.text()}`);
+    }
+    const data = await res.json();
+    const page: GraphMessage[] = data.value || [];
+    messages.push(...page);
+
+    // Follow pagination if more pages exist and we haven't hit our limit
+    nextUrl = data["@odata.nextLink"] && messages.length < limit ? data["@odata.nextLink"] : null;
   }
-  const data = await res.json();
-  const messages: GraphMessage[] = data.value || [];
 
   let synced = 0;
   let skipped = 0;

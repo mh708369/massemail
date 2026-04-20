@@ -4,7 +4,7 @@ import { getCurrentUser, isAdmin } from "@/lib/rbac";
 
 export async function POST(req: Request) {
   const { searchParams } = new URL(req.url);
-  const limit = parseInt(searchParams.get("limit") || "50");
+  const limit = parseInt(searchParams.get("limit") || "200");
   const scope = searchParams.get("scope"); // "mine" | "all"
 
   const user = await getCurrentUser();
@@ -32,7 +32,7 @@ export async function GET(req: Request) {
   const userIdToSync = user && (!isAdmin(user) || scope === "mine") ? user.id : undefined;
 
   try {
-    const result = await syncInboxFromGraph(50, userIdToSync);
+    const result = await syncInboxFromGraph(200, userIdToSync);
     return NextResponse.json({ success: true, ...result });
   } catch (error) {
     return NextResponse.json(
