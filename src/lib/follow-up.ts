@@ -220,7 +220,7 @@ export async function processFollowUps() {
     const variables: Record<string, string> = {
       name: exec.contact.name,
       email: exec.contact.email,
-      company: exec.contact.company || "",
+      company: exec.contact.company || "your organization",
     };
 
     const body = parseTemplate(step.template?.body || step.body || "", variables);

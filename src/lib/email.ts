@@ -157,6 +157,14 @@ export async function sendEmail({
       : await buildAutoCcList(cc, senderUserId, to);
     const bccList = skipAutoCcBcc ? [] : buildAutoBccList(to, ccList);
 
+    // Resolve {{name}}, {{email}}, {{company}} variables from the contact
+    const contact = await prisma.contact.findUnique({ where: { id: contactId }, select: { name: true, email: true, company: true } });
+    if (contact && (body.includes("{{") || subject.includes("{{"))) {
+      const vars = { name: contact.name, email: contact.email, company: contact.company || "your organization" };
+      body = parseTemplate(body, vars);
+      subject = parseTemplate(subject, vars);
+    }
+
     // Create the email record FIRST so we have its ID for tracking.
     // Avoid passing bccAddr + userId in the typed create — stale Prisma
     // client may not know about those columns. We patch them via raw SQL.
@@ -358,11 +366,11 @@ export async function sendBulkEmail({
     const personalizedBody = parseTemplate(body, {
       name: contact.name,
       email: contact.email,
-      company: contact.company || "",
+      company: contact.company || "your organization",
     });
     const personalizedSubject = parseTemplate(subject, {
       name: contact.name,
-      company: contact.company || "",
+      company: contact.company || "your organization",
     });
 
     const result = await sendEmail({
