@@ -511,6 +511,8 @@ interface GraphMessage {
   receivedDateTime?: string;
   isRead?: boolean;
   internetMessageId?: string;
+  inferenceClassification?: string;
+  isAutomaticForward?: boolean;
 }
 
 // Global sync lock to prevent concurrent syncs from producing duplicate replies
@@ -593,6 +595,36 @@ async function syncSingleMailbox({
     });
 
     const replyBody = msg.body?.content || msg.bodyPreview || "";
+    const subjectLower = (msg.subject || "").toLowerCase();
+
+    // Skip auto-replies, out-of-office, and automated messages — never reply to them
+    const isAutoReply =
+      msg.inferenceClassification === "other" ||
+      msg.isAutomaticForward === true ||
+      /auto[\s-]?reply|automatic reply|out[\s-]?of[\s-]?office|ooo|do[\s-]?not[\s-]?reply|noreply|no-reply|undeliverable|delivery.*fail|mailer[\s-]?daemon|postmaster/i.test(subjectLower) ||
+      /auto[\s-]?reply|automatic reply|out[\s-]?of[\s-]?office|this is an automated|auto[\s-]?generated|do not reply/i.test(replyBody.slice(0, 500));
+
+    if (isAutoReply) {
+      console.log(`[sync] Skipping auto-reply from ${senderEmail}: "${msg.subject}"`);
+      // Still save the inbound record but skip AI classification & reply
+      await prisma.emailMessage.create({
+        data: {
+          direction: "inbound",
+          fromAddr: senderEmail,
+          toAddr: mailboxAddress,
+          subject: msg.subject || "(no subject)",
+          body: replyBody,
+          status: "delivered",
+          messageId: msg.id,
+          sentAt: msg.receivedDateTime ? new Date(msg.receivedDateTime) : new Date(),
+          contactId: contact.id,
+          aiClassification: "neutral",
+          aiSummary: "Auto-reply / Out-of-office (skipped)",
+        },
+      });
+      synced++;
+      continue;
+    }
 
     let classification: string | null = null;
     let summary: string | null = null;

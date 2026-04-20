@@ -58,8 +58,9 @@ export async function classifyReply({
   originalBody: string;
   replyBody: string;
 }): Promise<ReplyClassification> {
-  const today = new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-  const currentYear = new Date().getFullYear();
+  const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+  const today = now.toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  const currentYear = now.getFullYear();
 
   const systemPrompt = `You are an AI sales assistant for Synergific Software Pvt. Ltd. — an ISO certified IT services & training company offering Cloud (AWS/Azure/GCP), DevOps, AI/ML, Cybersecurity, and 200+ training courses with 1,100+ certification vouchers.
 

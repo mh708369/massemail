@@ -4,8 +4,9 @@ import { generateText } from "@/lib/ai";
 export async function POST(req: Request) {
   const { goal, audience, tone } = await req.json();
 
-  const today = new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-  const currentYear = new Date().getFullYear();
+  const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+  const today = now.toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  const currentYear = now.getFullYear();
 
   const systemPrompt = `You are an expert email marketing copywriter for Synergific Software Pvt. Ltd., a leading Indian IT services, cloud training, and certification company based in Bangalore.
 
