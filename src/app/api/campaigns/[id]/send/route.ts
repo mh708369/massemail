@@ -21,17 +21,22 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     return NextResponse.json({ error: "Campaign missing subject or content" }, { status: 400 });
   }
 
-  // Resolve audience
+  // Resolve audience with filtering
   let targetIds: string[] = contactIds || [];
-  if (!targetIds.length && audienceFilter) {
+  if (!targetIds.length) {
     const where: Record<string, unknown> = {};
-    if (audienceFilter.status) where.status = audienceFilter.status;
+    if (audienceFilter?.status) where.status = audienceFilter.status;
+    if (audienceFilter?.source) where.source = audienceFilter.source;
+    if (audienceFilter?.tags) where.tags = { contains: audienceFilter.tags };
+    if (audienceFilter?.hasCompany) where.company = { not: null };
+    // Default: all leads if no filter specified
+    if (Object.keys(where).length === 0) where.status = "lead";
     const contacts = await prisma.contact.findMany({ where, select: { id: true } });
     targetIds = contacts.map((c) => c.id);
   }
 
   if (!targetIds.length) {
-    return NextResponse.json({ error: "No contacts to send to" }, { status: 400 });
+    return NextResponse.json({ error: "No contacts match the audience filter" }, { status: 400 });
   }
 
   const contacts = await prisma.contact.findMany({

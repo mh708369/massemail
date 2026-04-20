@@ -112,10 +112,12 @@ export default async function DashboardPage() {
   const openTickets = await prisma.ticket.count({
     where: { ...ticketScope, status: { in: ["open", "in_progress"] } },
   });
-  const wonDeals = await prisma.deal.findMany({
+  const wonDealsAgg = await prisma.deal.aggregate({
     where: { ...dealScope, stage: "won" },
+    _sum: { value: true },
+    _count: true,
   });
-  const totalRevenue = wonDeals.reduce((sum, d) => sum + d.value, 0);
+  const totalRevenue = wonDealsAgg._sum.value || 0;
 
   const stageColors: Record<string, { dot: string; text: string }> = {
     lead: { dot: "bg-slate-400", text: "text-slate-300" },
@@ -214,7 +216,7 @@ export default async function DashboardPage() {
             title="Revenue"
             value={`₹${(totalRevenue / 1000).toFixed(1)}k`}
             icon={DollarSign}
-            description={`${wonDeals.length} won · ${dealCount} total deals`}
+            description={`${wonDealsAgg._count} won · ${dealCount} total deals`}
             variant="success"
           />
           <StatCard

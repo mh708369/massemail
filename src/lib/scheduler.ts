@@ -3,6 +3,7 @@ import { prisma } from "./prisma";
 import { sendEmail, parseTemplate, syncInboxFromGraph } from "./email";
 import { processWeeklyDigests } from "./digest";
 import { checkStuckDeals } from "./stuck-deals";
+import { logAction } from "./audit";
 
 // Run schedulers every 5 minutes (in-memory, single instance only)
 const INTERVAL_MS = 5 * 60 * 1000;
@@ -166,6 +167,74 @@ async function processScheduledCampaigns() {
   }
 }
 
+/**
+ * Process active workflows — evaluate triggers and execute actions.
+ */
+async function processWorkflows() {
+  const workflows = await prisma.workflow.findMany({ where: { isActive: true } });
+  if (workflows.length === 0) return;
+
+  const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
+
+  for (const wf of workflows) {
+    try {
+      const conditions = wf.conditions ? JSON.parse(wf.conditions) : {};
+      const actions = wf.actions ? JSON.parse(wf.actions) : [];
+      if (!actions.length) continue;
+
+      let matchedRecords: Array<{ contactId: string; contactName: string; contactEmail: string; ownerId?: string | null }> = [];
+
+      if (wf.trigger === "contact_created") {
+        const contacts = await prisma.contact.findMany({
+          where: { createdAt: { gte: wf.lastRunAt || fiveMinAgo }, ...(conditions.status ? { status: conditions.status } : {}), ...(conditions.source ? { source: conditions.source } : {}) },
+          select: { id: true, name: true, email: true, ownerId: true },
+        });
+        matchedRecords = contacts.map((c) => ({ contactId: c.id, contactName: c.name, contactEmail: c.email, ownerId: c.ownerId }));
+      } else if (wf.trigger === "deal_stage_changed") {
+        const deals = await prisma.deal.findMany({
+          where: { updatedAt: { gte: wf.lastRunAt || fiveMinAgo }, ...(conditions.stage ? { stage: conditions.stage } : {}) },
+          include: { contact: { select: { id: true, name: true, email: true, ownerId: true } } },
+        });
+        matchedRecords = deals.filter((d) => d.contact).map((d) => ({ contactId: d.contact!.id, contactName: d.contact!.name, contactEmail: d.contact!.email, ownerId: d.ownerId }));
+      } else if (wf.trigger === "lead_score_above") {
+        const threshold = conditions.score || 50;
+        const contacts = await prisma.contact.findMany({
+          where: { leadScore: { gte: threshold }, updatedAt: { gte: wf.lastRunAt || fiveMinAgo } },
+          select: { id: true, name: true, email: true, ownerId: true },
+        });
+        matchedRecords = contacts.map((c) => ({ contactId: c.id, contactName: c.name, contactEmail: c.email, ownerId: c.ownerId }));
+      }
+
+      if (matchedRecords.length === 0) continue;
+
+      for (const record of matchedRecords) {
+        for (const action of actions) {
+          try {
+            if (action.type === "send_email" && action.subject && action.body) {
+              await sendEmail({ to: record.contactEmail, subject: parseTemplate(action.subject, { name: record.contactName, email: record.contactEmail, company: "" }), body: parseTemplate(action.body, { name: record.contactName, email: record.contactEmail, company: "" }), contactId: record.contactId, senderUserId: record.ownerId });
+            } else if (action.type === "create_task" && action.title) {
+              const assignTo = record.ownerId || (await prisma.user.findFirst({ where: { role: "admin" }, select: { id: true } }))?.id;
+              if (assignTo) await prisma.task.create({ data: { title: parseTemplate(action.title, { name: record.contactName }), description: action.description || null, priority: action.priority || "medium", contactId: record.contactId, userId: assignTo } });
+            } else if (action.type === "update_status" && action.status) {
+              await prisma.contact.update({ where: { id: record.contactId }, data: { status: action.status } });
+            } else if (action.type === "add_tag" && action.tag) {
+              const c = await prisma.contact.findUnique({ where: { id: record.contactId }, select: { tags: true } });
+              const tags = c?.tags ? c.tags.split(",").map((t) => t.trim()) : [];
+              if (!tags.includes(action.tag)) { tags.push(action.tag); await prisma.contact.update({ where: { id: record.contactId }, data: { tags: tags.join(",") } }); }
+            } else if (action.type === "notify" && action.message) {
+              const uid = record.ownerId || (await prisma.user.findFirst({ where: { role: "admin" }, select: { id: true } }))?.id;
+              if (uid) await prisma.notification.create({ data: { userId: uid, type: "workflow", title: `Workflow: ${wf.name}`, message: parseTemplate(action.message, { name: record.contactName }), link: `/contacts/${record.contactId}` } });
+            }
+          } catch (ae) { console.error(`[workflow] Action failed:`, ae); }
+        }
+      }
+
+      await prisma.workflow.update({ where: { id: wf.id }, data: { runCount: { increment: matchedRecords.length }, lastRunAt: new Date() } });
+      console.log(`[workflow] "${wf.name}" triggered for ${matchedRecords.length} records`);
+    } catch (e) { console.error(`[workflow] "${wf.name}" failed:`, e); }
+  }
+}
+
 export function startFollowUpScheduler() {
   if (globalThis.__followUpSchedulerStarted) return;
   globalThis.__followUpSchedulerStarted = true;
@@ -190,7 +259,7 @@ export function startFollowUpScheduler() {
 
       // Sync inbound emails from the shared mailbox + any connected per-user mailboxes
       try {
-        const syncResult = await syncInboxFromGraph(50);
+        const syncResult = await syncInboxFromGraph(200);
         if (syncResult.synced > 0) {
           console.log(
             `[scheduler] Synced ${syncResult.synced} inbound emails from ${syncResult.mailboxes} mailbox(es)`
@@ -240,6 +309,13 @@ export function startFollowUpScheduler() {
           console.error("[scheduler] Stuck deals run failed:", e);
         }
       }
+      // Process workflow triggers — check for contacts/deals matching active workflow conditions
+      try {
+        await processWorkflows();
+      } catch (e) {
+        console.error("[scheduler] Workflow processing failed:", e);
+      }
+
     } catch (e) {
       console.error("[scheduler] Run failed:", e);
     }

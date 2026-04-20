@@ -712,6 +712,19 @@ async function syncSingleMailbox({
           where: { id: inboundRecord.id },
           data: { aiReplied: true },
         });
+        // Log AI reply as activity
+        if (ownerUserId) {
+          try {
+            await prisma.activity.create({
+              data: {
+                type: "ai_reply",
+                description: `AI auto-replied to ${contact.name} (${classification}): ${summary || msg.subject}`,
+                userId: ownerUserId,
+                contactId: contact.id,
+              },
+            });
+          } catch {}
+        }
       }
 
       if (classification === "positive") {
