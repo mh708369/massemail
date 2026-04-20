@@ -720,7 +720,7 @@ async function syncSingleMailbox({
  * Sync inbound emails. By default syncs the shared mailbox AND every active
  * per-user connected mailbox. Pass `userId` to sync only one user's mailbox.
  */
-export async function syncInboxFromGraph(limit = 50, userId?: string) {
+export async function syncInboxFromGraph(limit = 200, userId?: string) {
   // Prevent concurrent syncs — if one is already running, skip
   if (syncLock) {
     return { synced: 0, skipped: 0, unmatched: 0, total: 0, mailboxes: 0, errors: [{ mailbox: "all", error: "Sync already in progress" }] };

@@ -38,7 +38,7 @@ export async function GET(req: Request) {
         LEFT JOIN "Contact" c ON e.contactId = c.id
        WHERE ${clauses.join(" AND ")}
        ORDER BY e.createdAt DESC
-       LIMIT 100`;
+       LIMIT 500`;
 
     const rows = await prisma.$queryRawUnsafe<
       Array<Record<string, unknown>>
@@ -58,7 +58,7 @@ export async function GET(req: Request) {
       const emails = await prisma.emailMessage.findMany({
         orderBy: { createdAt: "desc" },
         include: { contact: true },
-        take: 100,
+        take: 500,
       });
       return NextResponse.json(emails);
     } catch {
