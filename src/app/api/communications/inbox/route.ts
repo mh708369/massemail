@@ -12,7 +12,6 @@ export async function GET(req: Request) {
       : prisma.emailMessage.findMany({
           orderBy: { createdAt: "desc" },
           include: { contact: true },
-          take: 50,
           ...(search
             ? { where: { OR: [{ subject: { contains: search } }, { body: { contains: search } }, { contact: { name: { contains: search } } }] } }
             : {}),
@@ -22,7 +21,7 @@ export async function GET(req: Request) {
       : prisma.whatsAppMessage.findMany({
           orderBy: { createdAt: "desc" },
           include: { contact: true },
-          take: 50,
+          take: 100,
           ...(search
             ? { where: { OR: [{ content: { contains: search } }, { contact: { name: { contains: search } } }] } }
             : {}),
