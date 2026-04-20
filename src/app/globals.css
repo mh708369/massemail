@@ -123,55 +123,119 @@
 }
 
 .light {
-  /* Light Mode — clean off-white base + electric violet accent */
-  --background: oklch(0.98 0.002 260);
-  --foreground: oklch(0.13 0.02 260);
+  /* Light Mode — Synergific Lab Store inspired: dark navy sidebar + purple accent */
+  --background: oklch(0.965 0.004 265);           /* Light gray-blue bg #F5F6FA */
+  --foreground: oklch(0.16 0.025 265);             /* Near-black text */
 
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.13 0.02 260);
+  --card: oklch(1 0 0);                            /* Pure white cards */
+  --card-foreground: oklch(0.16 0.025 265);
 
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.13 0.02 260);
+  --popover-foreground: oklch(0.16 0.025 265);
 
-  --primary: oklch(0.50 0.24 285);
+  /* Primary: Synergific Purple #6C5CE7 */
+  --primary: oklch(0.52 0.22 285);
   --primary-foreground: oklch(0.99 0 0);
 
-  --secondary: oklch(0.965 0.004 260);
-  --secondary-foreground: oklch(0.2 0.015 260);
+  --secondary: oklch(0.955 0.006 265);
+  --secondary-foreground: oklch(0.22 0.02 265);
 
-  --muted: oklch(0.96 0.004 260);
-  --muted-foreground: oklch(0.44 0.014 260);
+  --muted: oklch(0.955 0.005 265);
+  --muted-foreground: oklch(0.46 0.016 265);
 
-  --accent: oklch(0.955 0.012 285);
-  --accent-foreground: oklch(0.2 0.015 260);
+  --accent: oklch(0.94 0.015 285);
+  --accent-foreground: oklch(0.22 0.02 265);
 
   --destructive: oklch(0.55 0.24 25);
 
-  --border: oklch(0.91 0.006 260);
-  --input: oklch(0.93 0.005 260);
-  --ring: oklch(0.50 0.24 285);
+  --border: oklch(0.90 0.008 265);
+  --input: oklch(0.92 0.006 265);
+  --ring: oklch(0.52 0.22 285);
 
-  --sidebar: oklch(0.975 0.004 260);
-  --sidebar-foreground: oklch(0.13 0.02 260);
-  --sidebar-primary: oklch(0.50 0.24 285);
+  /* Sidebar: Dark navy like Lab Store #1B1F3B */
+  --sidebar: oklch(0.20 0.04 270);
+  --sidebar-foreground: oklch(0.85 0.01 270);
+  --sidebar-primary: oklch(0.65 0.20 285);
   --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.94 0.012 285);
-  --sidebar-accent-foreground: oklch(0.2 0.015 260);
-  --sidebar-border: oklch(0.91 0.006 260);
-  --sidebar-ring: oklch(0.50 0.24 285);
+  --sidebar-accent: oklch(0.26 0.05 275);
+  --sidebar-accent-foreground: oklch(0.95 0.005 270);
+  --sidebar-border: oklch(0.25 0.04 270);
+  --sidebar-ring: oklch(0.65 0.20 285);
 
-  --gradient-brand: linear-gradient(135deg, oklch(0.50 0.24 285) 0%, oklch(0.45 0.26 295) 50%, oklch(0.42 0.24 305) 100%);
+  --gradient-brand: linear-gradient(135deg, oklch(0.52 0.22 285) 0%, oklch(0.48 0.24 295) 50%, oklch(0.45 0.22 300) 100%);
   --gradient-mesh: radial-gradient(at 0% 0%, oklch(0.92 0.06 285) 0px, transparent 50%),
                    radial-gradient(at 100% 0%, oklch(0.92 0.06 200) 0px, transparent 50%),
                    radial-gradient(at 100% 100%, oklch(0.92 0.06 145) 0px, transparent 50%);
 
   --shadow-xs: 0 1px 2px rgb(15 23 42 / 0.04);
   --shadow-sm: 0 1px 3px rgb(15 23 42 / 0.06), 0 1px 2px rgb(15 23 42 / 0.04);
-  --shadow-md: 0 4px 6px -1px rgb(15 23 42 / 0.06), 0 2px 4px -2px rgb(15 23 42 / 0.04);
-  --shadow-lg: 0 10px 15px -3px rgb(15 23 42 / 0.07), 0 4px 6px -4px rgb(15 23 42 / 0.04);
-  --shadow-xl: 0 20px 25px -5px rgb(15 23 42 / 0.08), 0 8px 10px -6px rgb(15 23 42 / 0.05);
-  --shadow-glow: 0 0 0 1px oklch(0.50 0.24 285 / 0.12), 0 4px 16px oklch(0.50 0.24 285 / 0.12);
-  --shadow-glow-strong: 0 0 0 1px oklch(0.50 0.24 285 / 0.2), 0 8px 24px oklch(0.50 0.24 285 / 0.18);
+  --shadow-md: 0 4px 6px -1px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.04);
+  --shadow-lg: 0 10px 15px -3px rgb(15 23 42 / 0.08), 0 4px 6px -4px rgb(15 23 42 / 0.05);
+  --shadow-xl: 0 20px 25px -5px rgb(15 23 42 / 0.10), 0 8px 10px -6px rgb(15 23 42 / 0.06);
+  --shadow-glow: 0 0 0 1px oklch(0.52 0.22 285 / 0.14), 0 4px 16px oklch(0.52 0.22 285 / 0.12);
+  --shadow-glow-strong: 0 0 0 1px oklch(0.52 0.22 285 / 0.22), 0 8px 24px oklch(0.52 0.22 285 / 0.20);
+}
+
+/* ── Dark navy sidebar text overrides for light mode ── */
+.light aside.bg-sidebar,
+.light [data-sidebar] {
+  --foreground: oklch(0.92 0.005 270);
+  --muted-foreground: oklch(0.65 0.015 270);
+  --border: oklch(0.28 0.04 270);
+  color: oklch(0.92 0.005 270);
+}
+.light aside.bg-sidebar .text-foreground,
+.light aside.bg-sidebar .hover\:text-foreground:hover {
+  color: oklch(0.95 0.005 270) !important;
+}
+.light aside.bg-sidebar .text-muted-foreground {
+  color: oklch(0.62 0.015 270) !important;
+}
+.light aside.bg-sidebar .hover\:text-foreground:hover .text-muted-foreground\/80,
+.light aside.bg-sidebar .group:hover .group-hover\:text-foreground {
+  color: oklch(0.92 0.005 270) !important;
+}
+.light aside.bg-sidebar .text-muted-foreground\/80 {
+  color: oklch(0.55 0.012 270) !important;
+}
+.light aside.bg-sidebar .text-muted-foreground\/70 {
+  color: oklch(0.50 0.012 270) !important;
+}
+.light aside.bg-sidebar .text-muted-foreground\/60 {
+  color: oklch(0.48 0.01 270) !important;
+}
+.light aside.bg-sidebar .border-sidebar-border {
+  border-color: oklch(0.28 0.04 270) !important;
+}
+.light aside.bg-sidebar .border-border {
+  border-color: oklch(0.30 0.03 270) !important;
+}
+.light aside.bg-sidebar .bg-sidebar-accent {
+  background-color: oklch(0.28 0.06 275) !important;
+}
+.light aside.bg-sidebar .hover\:bg-sidebar-accent\/60:hover {
+  background-color: oklch(0.26 0.05 275 / 0.6) !important;
+}
+.light aside.bg-sidebar .bg-primary\/15 {
+  background-color: oklch(0.65 0.20 285 / 0.20) !important;
+}
+.light aside.bg-sidebar .text-primary {
+  color: oklch(0.72 0.18 285) !important;
+}
+.light aside.bg-sidebar .bg-violet-500\/20 {
+  background-color: oklch(0.60 0.18 285 / 0.25) !important;
+}
+.light aside.bg-sidebar .text-violet-300 {
+  color: oklch(0.72 0.16 285) !important;
+}
+.light aside.bg-sidebar .bg-blue-500\/20 {
+  background-color: oklch(0.55 0.14 250 / 0.25) !important;
+}
+.light aside.bg-sidebar .text-blue-300 {
+  color: oklch(0.72 0.12 250) !important;
+}
+.light aside.bg-sidebar .gradient-brand {
+  background: linear-gradient(135deg, oklch(0.55 0.22 285) 0%, oklch(0.50 0.24 295) 100%) !important;
 }
 
 .light .bg-grid {
@@ -186,6 +250,16 @@
 }
 .light .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: oklch(0.76 0.01 260);
+}
+/* Dark scrollbar inside navy sidebar */
+.light aside.bg-sidebar .scrollbar-thin {
+  scrollbar-color: oklch(0.35 0.03 270) transparent;
+}
+.light aside.bg-sidebar .scrollbar-thin::-webkit-scrollbar-thumb {
+  background: oklch(0.35 0.03 270);
+}
+.light aside.bg-sidebar .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.42 0.04 270);
 }
 
 /*
@@ -218,7 +292,7 @@
 .light .text-slate-300   { color: oklch(0.45 0.01 260) !important; }
 .light .text-slate-400   { color: oklch(0.50 0.01 260) !important; }
 .light .text-indigo-300  { color: oklch(0.48 0.18 275) !important; }
-.light .text-primary     { color: oklch(0.50 0.24 285) !important; }
+.light .text-primary     { color: oklch(0.52 0.22 285) !important; }
 .light .text-blue-200    { color: oklch(0.48 0.16 255) !important; }
 
 /* ── Background tint upgrades (the /10 + /20 alpha tints) ── */
@@ -233,10 +307,10 @@
 .light .bg-violet-500\/20  { background-color: oklch(0.48 0.20 290 / 0.14) !important; }
 .light .bg-amber-500\/10   { background-color: oklch(0.55 0.16 70 / 0.08)  !important; }
 .light .bg-amber-500\/20   { background-color: oklch(0.55 0.16 70 / 0.14)  !important; }
-.light .bg-primary\/10     { background-color: oklch(0.50 0.24 285 / 0.08) !important; }
-.light .bg-primary\/15     { background-color: oklch(0.50 0.24 285 / 0.10) !important; }
-.light .bg-primary\/20     { background-color: oklch(0.50 0.24 285 / 0.12) !important; }
-.light .bg-primary\/5      { background-color: oklch(0.50 0.24 285 / 0.04) !important; }
+.light .bg-primary\/10     { background-color: oklch(0.52 0.22 285 / 0.08) !important; }
+.light .bg-primary\/15     { background-color: oklch(0.52 0.22 285 / 0.10) !important; }
+.light .bg-primary\/20     { background-color: oklch(0.52 0.22 285 / 0.12) !important; }
+.light .bg-primary\/5      { background-color: oklch(0.52 0.22 285 / 0.04) !important; }
 .light .bg-blue-500\/5     { background-color: oklch(0.48 0.16 255 / 0.04) !important; }
 
 /* ── Border tint upgrades ── */
@@ -248,8 +322,8 @@
 .light .border-violet-500\/30  { border-color: oklch(0.48 0.20 290 / 0.20) !important; }
 .light .border-violet-500\/20  { border-color: oklch(0.48 0.20 290 / 0.16) !important; }
 .light .border-amber-500\/30   { border-color: oklch(0.55 0.16 70 / 0.20)  !important; }
-.light .border-primary\/30     { border-color: oklch(0.50 0.24 285 / 0.18) !important; }
-.light .border-primary\/40     { border-color: oklch(0.50 0.24 285 / 0.22) !important; }
+.light .border-primary\/30     { border-color: oklch(0.52 0.22 285 / 0.18) !important; }
+.light .border-primary\/40     { border-color: oklch(0.52 0.22 285 / 0.22) !important; }
 
 /* ── Ring upgrades ── */
 .light .ring-emerald-500\/20 { --tw-ring-color: oklch(0.50 0.14 160 / 0.15) !important; }
@@ -257,7 +331,7 @@
 .light .ring-rose-500\/20    { --tw-ring-color: oklch(0.55 0.20 15 / 0.15)  !important; }
 .light .ring-violet-500\/20  { --tw-ring-color: oklch(0.48 0.20 290 / 0.15) !important; }
 .light .ring-amber-500\/20   { --tw-ring-color: oklch(0.55 0.16 70 / 0.15)  !important; }
-.light .ring-primary\/20     { --tw-ring-color: oklch(0.50 0.24 285 / 0.15) !important; }
+.light .ring-primary\/20     { --tw-ring-color: oklch(0.52 0.22 285 / 0.15) !important; }
 
 /* ── Sidebar role badge upgrades ── */
 .light .bg-violet-500\/20 { background-color: oklch(0.50 0.20 290 / 0.12) !important; }
@@ -265,7 +339,7 @@
 
 /* ── Focus ring lighter glow in light mode ── */
 .light *:focus-visible {
-  outline-color: oklch(0.50 0.24 285);
+  outline-color: oklch(0.52 0.22 285);
 }
 
 @layer base {
