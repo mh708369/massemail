@@ -251,7 +251,7 @@ export function Sidebar() {
       <div className="px-4 py-4 border-b border-sidebar-border">
         <Link href="/dashboard" className="flex flex-col items-center gap-2 group">
           <img
-            src="/logo.jpeg"
+            src="/logo.png"
             alt="Synergific Software"
             className="w-full h-auto object-contain group-hover:scale-[1.02] transition-transform"
           />

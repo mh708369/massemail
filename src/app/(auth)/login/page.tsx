@@ -46,7 +46,7 @@ export default function LoginPage() {
           {/* Top: Logo */}
           <Link href="/" className="inline-flex items-center gap-3 group">
             <img
-              src="/logo.jpeg"
+              src="/logo.png"
               alt="Synergific Software"
               className="h-12 w-auto rounded-lg bg-white/15 backdrop-blur-lg border border-white/20 p-1 group-hover:scale-105 transition-transform"
             />
