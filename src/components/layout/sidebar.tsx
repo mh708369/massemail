@@ -248,12 +248,12 @@ export function Sidebar() {
   return (
     <aside className="w-[244px] flex-shrink-0 border-r border-sidebar-border bg-sidebar flex flex-col h-screen sticky top-0">
       {/* ── Brand ─────────────────────────── */}
-      <div className="px-4 py-4 border-b border-sidebar-border">
-        <Link href="/dashboard" className="flex flex-col items-center gap-2 group">
+      <div className="px-5 py-3 border-b border-sidebar-border">
+        <Link href="/dashboard" className="flex flex-col items-center gap-1.5 group">
           <img
             src="/logo.png"
             alt="Synergific Software"
-            className="w-full h-auto object-contain group-hover:scale-[1.02] transition-transform"
+            className="w-[160px] h-auto object-contain group-hover:scale-[1.02] transition-transform"
           />
           <p className="text-[10px] font-semibold text-muted-foreground tracking-widest uppercase">
             Business Suite
